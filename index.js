@@ -1,5 +1,4 @@
 let express = require("express")
-const { getdata, updateDisplayName } = require("./api")
 let fetch=require('node-fetch')
 let app = express()
 
@@ -28,34 +27,14 @@ let newdata=()=>{
     app.get("/", async(req, res) => {
         let api=req.body
         if(api=="new"){
-            let ndata=[];
-             newdata()
-            .then((r)=>{
-                // res.send(r)
-                mapnew(r)
-                
-            })
-            let odata=[];
-            olddata()
-            .then((r)=>{
-               mapold(r)
-               
-            })
-            function mapold(r){
-               odata.push(r)
-               mapping()
-              
-            }  
-            function mapnew(r){
-                ndata.push(r)
-                mapping()
-
-
-            }
-            function mapping(){
+            Promise.all([
+                newdata(),
+                olddata()
+            ])
+            .then(([ndata,odata])=>{
                 let arr1=[]
-                let o=odata[0] || [];
-                let n=ndata[0] || [];
+                let o=odata|| [];
+                let n=ndata|| [];
                 o.forEach((el)=>{
                 arr1.push(Object.keys(el))
                 })
@@ -75,10 +54,11 @@ let newdata=()=>{
                 main.push(newobj)
 
                 }
-                 console.log(main,"main")
                 res.send(main)
-
-            }
+            }).catch((err)=>{
+                console.log(err)
+            })
+           
         }
         
         else if(api=="old"){
